@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SDCI Colour House Scores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-deep: #071228;
+    --navy-mid: #0c1f45;
+    --navy-card: #0e254f;
+    --gold: #d9a441;
+    --gold-light: #f3cf7a;
+    --gold-dark: #a97c2b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--navy-deep);
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .board {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 40%),
+      linear-gradient(160deg, var(--navy-mid) 0%, var(--navy-deep) 60%, #050d1e 100%);
+    padding: 3.2vh 3vw 4vh 3vw;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* subtle diagonal streak texture in the background, like the reference image */
+  .board::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      115deg,
+      rgba(255,255,255,0.025) 0px,
+      rgba(255,255,255,0.025) 2px,
+      transparent 2px,
+      transparent 60px
+    );
+    z-index: 0;
+  }
+
+  .board::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      115deg,
+      rgba(217,164,65,0.06) 0px,
+      rgba(217,164,65,0.06) 3px,
+      transparent 3px,
+      transparent 140px
+    );
+    z-index: 0;
+  }
+
+  .title-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2vw;
+    margin-bottom: 2.4vh;
+    flex-shrink: 0;
+  }
+
+  .title-line {
+    flex: 1 1 auto;
+    max-width: 15vw;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    position: relative;
+  }
+  .title-line::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: -7px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+    opacity: 0.7;
+  }
+
+  h1 {
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    font-size: clamp(28px, 5.2vw, 64px);
+    white-space: nowrap;
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  }
+
+  .grid {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2.2vh 1.8vw;
+    min-height: 0;
+  }
+
+  .card {
+    position: relative;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--navy-card), var(--navy-deep));
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 0 1px rgba(217,164,65,0.25), 0 10px 24px rgba(0,0,0,0.35);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    position: relative;
+    height: 34%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .card-header .stripe {
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    width: 14%;
+    left: 4%;
+    transform: skewX(-18deg);
+  }
+
+  .card-header .stripe.s1 { background: rgba(255,255,255,0.35); left: 4%; width: 9%; }
+  .card-header .stripe.s2 { background: rgba(0,0,0,0.55); left: 15%; width: 5%; }
+
+  .card-header .label {
+    position: relative;
+    z-index: 2;
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(16px, 2.5vw, 30px);
+    letter-spacing: 0.03em;
+    margin-left: 26%;
+  }
+
+  .card-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score {
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    color: #fff;
+    font-size: clamp(38px, 6.5vw, 78px);
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: opacity 0.25s ease;
+  }
+
+  /* House-specific header colors */
+  .blue  .card-header { background: linear-gradient(120deg, #2a63c9 0%, #123a86 45%, #0a1f4d 100%); }
+  .blue  .label { color: #fff; }
+
+  .black .card-header { background: linear-gradient(120deg, #4a4a4a 0%, #1c1c1c 45%, #050505 100%); }
+  .black .label { color: #fff; }
+
+  .red   .card-header { background: linear-gradient(120deg, #d0242c 0%, #7c0d13 45%, #380509 100%); }
+  .red   .label { color: #fff; }
+
+  .white .card-header { background: linear-gradient(120deg, #ffffff 0%, #d7d9de 45%, #9aa0aa 100%); }
+  .white .label { color: #0c1f45; }
+  .white .stripe.s1 { background: rgba(12,31,69,0.15); }
+  .white .stripe.s2 { background: rgba(12,31,69,0.65); }
+
+  .green .card-header { background: linear-gradient(120deg, #1c8a4b 0%, #0d5b30 45%, #052f18 100%); }
+  .green .label { color: #fff; }
+
+  .gold  .card-header { background: linear-gradient(120deg, #f3d27a 0%, #d9a441 45%, #a97c2b 100%); }
+  .gold  .label { color: #0c1f45; }
+  .gold  .stripe.s1 { background: rgba(12,31,69,0.12); }
+  .gold  .stripe.s2 { background: rgba(12,31,69,0.7); }
+
+  .updated {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: rgba(217,164,65,0.55);
+    font-size: clamp(10px, 1vw, 13px);
+    letter-spacing: 0.05em;
+    margin-top: 1.4vh;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+  <div class="board">
+    <div class="title-row">
+      <div class="title-line"></div>
+      <h1>SDCI Colour House Scores</h1>
+      <div class="title-line"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card blue">
+        <div class="card-header">
+          <div class="stripe s1"></div><div class="stripe s2"></div>
+          <div class="label">BLUE</div>
+        </div>
+        <div class="card-body"><div class="score" id="score-blue">--</div></div>
+      </div>
+
+      <div class="card black">
+        <div class="card-header">
+          <div class="stripe s1"></div><div class="stripe s2"></div>
+          <div class="label">BLACK</div>
+        </div>
+        <div class="card-body"><div class="score" id="score-black">--</div></div>
+      </div>
+
+      <div class="card red">
+        <div class="card-header">
+          <div class="stripe s1"></div><div class="stripe s2"></div>
+          <div class="label">RED</div>
+        </div>
+        <div class="card-body"><div class="score" id="score-red">--</div></div>
+      </div>
+
+      <div class="card white">
+        <div class="card-header">
+          <div class="stripe s1"></div><div class="stripe s2"></div>
+          <div class="label">WHITE</div>
+        </div>
+        <div class="card-body"><div class="score" id="score-white">--</div></div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header">
+          <div class="stripe s1"></div><div class="stripe s2"></div>
+          <div class="label">GREEN</div>
+        </div>
+        <div class="card-body"><div class="score" id="score-green">--</div></div>
+      </div>
+
+      <div class="card gold">
+        <div class="card-header">
+          <div class="stripe s1"></div><div class="stripe s2"></div>
+          <div class="label">GOLD</div>
+        </div>
+        <div class="card-body"><div class="score" id="score-gold">--</div></div>
+      </div>
+    </div>
+
+    <div class="updated" id="updated-label">Loading scores&hellip;</div>
+  </div>
+
+<script>
+  // Published Google Sheet CSV URL (the "Total >" row holds live SUM totals)
+  var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT0sppWesc9oqQI4UewDKGliESD4WIp8zCVKnlXErqSHksciIuoqENWEj-gZfUV2qMbXvP4VuqKafq5/pub?gid=976803149&single=true&output=csv";
+
+  // Order of the six score columns as they appear in the Totals row
+  var HOUSES = ["blue", "black", "red", "white", "green", "gold"];
+
+  function parseFirstLine(csvText) {
+    var firstLine = csvText.split(/\r?\n/)[0];
+    return firstLine.split(",");
+  }
+
+  function updateScores() {
+    var url = CSV_URL + "&_ts=" + Date.now(); // cache-bust
+    fetch(url, { cache: "no-store" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.text();
+      })
+      .then(function (text) {
+        var cols = parseFirstLine(text);
+        // Totals row layout: [ , , "Total >", Blue, Black, Red, White, Green, Gold, ...]
+        var values = [cols[3], cols[4], cols[5], cols[6], cols[7], cols[8]];
+
+        HOUSES.forEach(function (house, i) {
+          var el = document.getElementById("score-" + house);
+          var raw = (values[i] || "").trim();
+          var num = parseInt(raw, 10);
+          if (el && !isNaN(num)) {
+            el.textContent = num;
+          }
+        });
+
+        var now = new Date();
+        document.getElementById("updated-label").textContent =
+          "Last updated " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      })
+      .catch(function (err) {
+        document.getElementById("updated-label").textContent =
+          "Could not refresh scores \u2014 showing last known values";
+        console.error("Score refresh failed:", err);
+      });
+  }
+
+  updateScores();
+  setInterval(updateScores, 5 * 60 * 1000); // refresh every 5 minutes
+</script>
+</body>
+</html>
